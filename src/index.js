@@ -10,11 +10,35 @@ app.use(cors());
 const users = [];
 
 function checksExistsUserAccount(request, response, next) {
-  // Complete aqui
+  const { username } = request.headers;
+
+  const user = users.find(user => user.username === username)
+
+  if (!user) {
+    return response.status(404).json({ error: 'Mensagem do erro' });
+  }
+  request.user = user;
+
+  return next();
 }
 
 function checksCreateTodosUserAvailability(request, response, next) {
-  // Complete aqui
+  const userRequest  = request.body;
+
+  const index = users.findIndex(user => {
+    if (user === userRequest) { 
+      return true
+    }
+  })
+
+  if (index != -1) {
+
+    if (user.pro != false && user.todos.length() < 10 || user.pro == true) {
+      return next();
+    } else {
+      return response.status(403).json({ error: "Mensagem de erro" });
+    }
+  }
 }
 
 function checksTodoExists(request, response, next) {
@@ -22,7 +46,15 @@ function checksTodoExists(request, response, next) {
 }
 
 function findUserById(request, response, next) {
-  // Complete aqui
+  const { id } = request.params;
+
+  const user = users.find(user => user.id === id);
+
+  if (!user) {
+    return response.status(404).json({ error: 'Mensagem do erro' });
+  }
+  request.user = user;
+  return next();
 }
 
 app.post('/users', (request, response) => {
