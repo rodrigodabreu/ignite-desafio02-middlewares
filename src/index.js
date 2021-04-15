@@ -23,26 +23,43 @@ function checksExistsUserAccount(request, response, next) {
 }
 
 function checksCreateTodosUserAvailability(request, response, next) {
-  const userRequest  = request.body;
+  const { user } = request;
 
-  const index = users.findIndex(user => {
-    if (user === userRequest) { 
-      return true
-    }
-  })
-
-  if (index != -1) {
-
-    if (user.pro != false && user.todos.length() < 10 || user.pro == true) {
-      return next();
-    } else {
-      return response.status(403).json({ error: "Mensagem de erro" });
-    }
+  if (user.pro == true || user.todos.length < 10) {
+    return next(); 
+  } else {
+    return response.status(403).json({error: 'Mensagem de erro'})
   }
 }
 
 function checksTodoExists(request, response, next) {
-  // Complete aqui
+  const { username } = request.headers;
+  const { id } = request.params;
+
+  //valida que o usuário existe
+  const user = users.find(user => user.username === username)
+
+  if (!user) {
+    return response.status(404).json({ error: 'User not found' });
+  }
+
+  //valida se id do TODO é uuid
+  const resultValidate = validate(id)
+
+  if (!resultValidate) {
+    return response.status(400).json({ error: 'This id is not a valid uuid' });
+  }
+
+  const todo = user.todos.find(todo => todo.id === id);
+
+  if (!todo) {
+    return response.status(404).json({error: 'Todo não encontrado'});
+  }
+
+  request.user = user;
+  request.todo = todo;
+  return next();
+
 }
 
 function findUserById(request, response, next) {
